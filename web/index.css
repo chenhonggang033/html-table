@@ -1,0 +1,59 @@
+html {
+  height: 100%;
+}
+.demo-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.demo-wrapper-header {
+  height: 30px;
+  background-color: aquamarine;
+  line-height: 30px;
+}
+.demo-wrapper-main {
+  height: 100%;
+  display: flex;
+  padding-top: 80px;
+  justify-content: center;
+}
+.demo-wrapper-main table,
+.demo-wrapper-main table tr th,
+.demo-wrapper-main table tr td {
+  border: 1px solid #d9d9d9;
+}
+.demo-wrapper-main table {
+  line-height: 50px;
+  text-align: center;
+  border-collapse: collapse;
+}
+.demo-wrapper-main table tr th,
+.demo-wrapper-main td {
+  width: 150px;
+  height: 50px;
+}
+.demo-wrapper-main th {
+  background-color: #f5f5f8;
+}
+.demo-wrapper-main table tr :first-child {
+  width: 80px;
+}
+.demo-wrapper-main .row-order-num {
+  position: relative;
+  width: 80px;
+  height: 50px;
+  background-color: #f5f5f8;
+}
+.demo-wrapper-main .row-order-num .table-operation-area {
+  position: absolute;
+  right: 0;
+  top: -35px;
+  padding: 0;
+  display: none;
+}
+.demo-wrapper-main .row-order-num .table-operation-area button {
+  width: 30px;
+}
+.demo-wrapper-main .row-order-num:hover .table-operation-area {
+  display: block;
+}
