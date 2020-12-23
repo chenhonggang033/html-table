@@ -33,27 +33,57 @@ html {
 
     table tr th,
     td {
+      position: relative;
       width: 150px;
-      height: 50px;
+      // height: 50px;
+      .merge-button-wrapper {
+        position: absolute;
+        right: 0;
+        top: -35px;
+        padding: 0;
+        display: none;
+        button {
+          width: 70px;
+          margin-right: 5px;
+        }
+      }
     }
 
-    th {
+    td:hover .merge-button-wrapper {
+      display: block;
+    }
+
+    th{
+      position: relative;
       background-color: #f5f5f8;
+      .button-wrapper {
+        position: absolute;
+        top: -30px;
+        right: 0;
+        display: none;
+
+        button {
+          width: 50px;
+          margin-right: 5px;
+        }
+      }
+    }
+
+    th:hover .button-wrapper{
+      display: block;
     }
 
     table tr {
-      :first-child {
+      td:first-child, th:first-child {
         width: 80px;
       }
     }
 
     .row-order-num {
       position: relative;
-      width: 80px;
-      height: 50px;
       background-color: #f5f5f8;
 
-      .table-operation-area {
+      .button-wrapper {
         position: absolute;
         right: 0;
         top: -35px;
@@ -61,13 +91,20 @@ html {
         display: none;
 
         button {
-          width: 30px;
+          width: 25px;
+          margin-right: 5px;
         }
       }
     }
 
-    .row-order-num:hover .table-operation-area {
+    .row-order-num:hover .button-wrapper {
       display: block;
+    }
+    .selected {
+       background-color: #cce2ff
+    }
+    .hidden-cell {
+      display: none;
     }
   }
 }
