@@ -1,6 +1,3 @@
-var rowCounts = 6;
-var colCounts = 5;
-
 var selectCellArr = [];
 var mergeObj = {
   startNode: undefined,
@@ -27,9 +24,10 @@ var setCellStatus = function (rowStart, rowEnd, colStart, colEnd) {
   for (var i = rowStart; i <= rowEnd; i++) {
     for (var j = colStart; j <= colEnd; j++) {
       var currentCell = tbodyRef.childNodes[i].childNodes[j];
-      if (currentCell.className === "hidden-cell") continue;
-      currentCell.className = "selected"
-      selectCellArr.push(currentCell);
+      if (currentCell.className !== "hidden-cell") {
+        currentCell.className = "selected"
+        selectCellArr.push(currentCell);
+      };
     }
   }
   mergeObj.rowInfo.rowStart = rowStart;
@@ -66,7 +64,7 @@ var mouseOver = function (cellNode) {
       for(var j = colStart; j <= colEnd; j++){
         var node = tbodyRef.childNodes[i].childNodes[j];
         if(node.getAttribute("merged")) {
-          nextRowEnd = Math.max(nextRowEnd, Number(node.getAttribute("row")) + Number(node.getAttribute("rowspan")) - 1);
+          nextRowEnd = Math.max(nextRowEnd, Number(node.getAttribute("row")) + Number(node.getAttribute("rowspan")) - 2);
           nextColEnd = Math.max(nextColEnd, Number(node.getAttribute("col")) + Number(node.getAttribute("colspan")) - 1);
         }
         if(node.className === "hidden-cell") {
@@ -93,8 +91,7 @@ var handleClickMerge = function (cellNode) {
   if (!mergeObj.startNode) {
     mergeObj.startNode = cellNode,
     cellNode.className += "selected"
-  } else {
-    if (cellNode === mergeObj.startNode) {
+  } else if (cellNode === mergeObj.startNode) {
       cellNode.removeAttribute("class");
       mergeObj.startNode = undefined;
     } else {
@@ -102,7 +99,7 @@ var handleClickMerge = function (cellNode) {
       var colInfo = mergeObj.colInfo;
       mergeCell(rowInfo, colInfo);
     }
-  }
+  
 }
 
 /**
@@ -127,7 +124,7 @@ var mergeCell = function (rowInfo, colInfo) {
 
   for (var i = rowInfo.rowStart; i <= rowInfo.rowEnd; i++) {
     for (var j = colInfo.colStart; j <= colInfo.colEnd; j++) {
-      debugger;
+      // JS引擎continue
       if(i === rowInfo.rowStart && j === colInfo.colStart) continue;
         var currentCell = tbodyRef.childNodes[i].childNodes[j];
         currentCell.setAttribute("class","hidden-cell");
@@ -143,7 +140,8 @@ var mergeCell = function (rowInfo, colInfo) {
   if (!mergeNode.getAttribute("merged")) {
     var buttonWrapper = mergeNode.childNodes[1];
     var cancleMergeButton = document.createElement("button");
-    cancleMergeButton.addEventListener('click', () => cancelMergeCell(mergeNode));
+    cancleMergeButton.addEventListener('click', function(){cancelMergeCell(mergeNode)});
+    // TODO innerHTML问题
     cancleMergeButton.innerHTML = "取消合并";
     buttonWrapper.appendChild(cancleMergeButton);
     mergeNode.className = "";
@@ -168,6 +166,7 @@ var cancelMergeCell = function (startNode) {
   var colspan = Number(startNode.getAttribute("colspan"));
   for(var i = row-1; i < row + rowspan - 1; i++) {
     for(var j = col; j < col + colspan; j++) {
+      // let for循环中的js引擎处理
       tbodyRef.childNodes[i].childNodes[j].removeAttribute("class");
     }
   }
@@ -189,10 +188,11 @@ var setFirstCell = function (cellNode, row) {
   buttonWrapper.setAttribute("class", "button-wrapper")
   cellNode.appendChild(buttonWrapper);
   var plusButton = document.createElement("button");
-  plusButton.addEventListener('click', () => insertTbodyRow(cellNode.parentNode, row));
+
+  plusButton.addEventListener('click', function(){sertTbodyRow(cellNode.parentNode, row)});
   plusButton.innerHTML = "+";
   var minusButton = document.createElement("button");
-  minusButton.addEventListener('click', () => removeTbodyRow(cellNode.parentNode.nextSibling, row))
+  minusButton.addEventListener('click', function(){removeTbodyRow(cellNode.parentNode.nextSibling, row)})
   minusButton.innerHTML = "-";
   buttonWrapper.appendChild(plusButton);
   buttonWrapper.appendChild(minusButton);
@@ -205,6 +205,7 @@ var setFirstCell = function (cellNode, row) {
  */
 var insertCol = function (cellNode, col) {
   //表头插入Cell --start--
+  // TODO 命名规范
   var TheadRowRef = cellNode.parentNode;
   var referNode = cellNode.nextSibling;
   var newElement = document.createElement("th");
@@ -213,6 +214,7 @@ var insertCol = function (cellNode, col) {
   //表头插入Cell --end--
   //tbody插入Cell --start--
   var tbodyRef = document.querySelector("tbody");
+  // 变量比米单字母
   for (var i = 0; i < tbodyRef.childNodes.length; i++) {
     var trRef = tbodyRef.childNodes[i];
     var newCell = trRef.insertCell(col + 1);
@@ -255,10 +257,10 @@ var setTheadCell = function (cellNode, col) {
     buttonWrapper.setAttribute("class", "button-wrapper")
     cellNode.appendChild(buttonWrapper);
     var plusButton = document.createElement("button");
-    plusButton.addEventListener('click', () => insertCol(cellNode, col));
+    plusButton.addEventListener('click', function(){insertCol(cellNode, col)});
     plusButton.innerHTML = "+";
     var minusButton = document.createElement("button");
-    minusButton.addEventListener('click', () => removeCol(cellNode, col))
+    minusButton.addEventListener('click', function(){removeCol(cellNode, col)})
     minusButton.innerHTML = "-";
     buttonWrapper.appendChild(plusButton);
     buttonWrapper.appendChild(minusButton);
@@ -282,6 +284,7 @@ var fixColChange = function (parentNode, fixIndex, action) {
     var tr = tbodyRef.childNodes[i];
     var indexTemp = fixIndex;
     for (var j = fixIndex; j < tr.childNodes.length; j++) {
+      // 重复逻辑错误
       action === "insert" ? setInputCell(tr.childNodes[j], i + 1, indexTemp, 1, 1, 0) : setInputCell(tr.childNodes[j], i + 1, indexTemp, 1, 1, 0);
       indexTemp++;
     }
@@ -305,7 +308,7 @@ var fixRowChange = function (nodeRef, nodeRow, action) {
   }
   var nextSibling = nodeRef.nextSibling;
   if (nextSibling) {
-    action === "insert" ? fixRowChange(nextSibling, nodeRow + 1, "insert") : fixRowChange(nextSibling, nodeRow + 1, "remove");
+    fixRowChange(nextSibling, nodeRow + 1, action);
   }
 }
 
@@ -360,56 +363,60 @@ var setInputCell = function (cellNode, row, col, rowspan, colspan, value) {
   cellNode.setAttribute("rowspan", rowspan);
   cellNode.setAttribute("colspan", colspan);
   cellNode.innerHTML = `<input value=${value}>`;
-  cellNode.addEventListener('mouseover', () => mouseOver(cellNode));
+  cellNode.addEventListener('mouseover', function(){mouseOver(cellNode)});
   if (col > 0) {
     var buttonWrapper = document.createElement("div");
     buttonWrapper.setAttribute("class", "merge-button-wrapper")
     cellNode.appendChild(buttonWrapper);
     var mergeButton = document.createElement("button");
-    mergeButton.addEventListener('click', () => handleClickMerge(cellNode));
+    mergeButton.addEventListener('click', function(){handleClickMerge(cellNode)});
     mergeButton.innerHTML = "合并";
     buttonWrapper.appendChild(mergeButton);
   }
 }
 
-function loadData() {
+window.onload = function () {
   var xhr = new XMLHttpRequest();
-  var url = 'table.html';
+  var url = '/initTable';
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
-      console.log(xhr.response);
-    }
-  }
-
-  xhr.open('GET', url, true);
-  xhr.send('');
-}
-
-window.onload = function () {
-  loadData();
-  var main = document.querySelector(".demo-wrapper-main");
-  var table = document.createElement("table");
-  var thead = document.createElement("thead");
-  var tbody = document.createElement("tbody");
-  for (var i = 0; i < rowCounts; i++) {
-    var tr = document.createElement("tr");
-    if (i === 0) {
-      thead.appendChild(tr);
-    } else {
-      tbody.appendChild(tr);
-    }
-    for (var j = 0; j < colCounts; j++) {
-      if (i === 0) {
-        var cell = document.createElement("th");
-        setTheadCell(cell, j)
-        tr.appendChild(cell);
-      } else {
-        var cell = tr.insertCell();
-        j === 0 ? setFirstCell(cell, i) : setInputCell(cell, i, j, 1, 1, 0);
+      var resData = JSON.parse(xhr.response);
+      var rowCounts = resData.rowCounts;
+      var colCounts = resData.colCounts;
+      var firstLine =  resData.firstLine;
+      console.log(firstLine);
+      var main = document.querySelector(".demo-wrapper-main");
+      var table = document.createElement("table");
+      var thead = document.createElement("thead");
+      var tbody = document.createElement("tbody");
+      for (var i = 0; i < rowCounts; i++) {
+        var tr = document.createElement("tr");
+        if (i === 0) {
+          thead.appendChild(tr);
+        } else {
+          tbody.appendChild(tr);
+        }
+        for (var j = 0; j < colCounts; j++) {
+          if (i === 0) {
+            var cell = document.createElement("th");
+            setTheadCell(cell, j)
+            tr.appendChild(cell);
+          } else {
+            var cell = tr.insertCell();
+            if(i === 1) {
+              j === 0 ? setFirstCell(cell, i) : setInputCell(cell, i, j, 1, 1, firstLine[j-1].value);
+            }
+            else {
+              j === 0 ? setFirstCell(cell, i) : setInputCell(cell, i, j, 1, 1, 0);
+            }
+          }
+        }
       }
+      table.appendChild(thead);
+      table.appendChild(tbody);
+      main.appendChild(table);
     }
   }
-  table.appendChild(thead);
-  table.appendChild(tbody);
-  main.appendChild(table);
+  xhr.open('GET', url, true);
+  xhr.send();
 }
